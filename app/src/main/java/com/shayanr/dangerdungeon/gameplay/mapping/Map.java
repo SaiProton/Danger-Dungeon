@@ -50,20 +50,32 @@ public class Map {
 
         //holes
         put("wh1.", "wall_hole_1");
-        put("wh2", "wall_hole_2");
+        put("wh2.", "wall_hole_2");
+
+        //normalwalls
+        put("wl..", "wall_left");
+        put("wm..", "wall_mid");
+        put("wr..", "wall_right");
     }};
 
     private String[][][] floorPlan = {
             {
-                    {"wbb.", "wbg.", "wbr.", "wby."},
-                    {"f1..", "f2..", "f3..", "f4.."},
-                    {"f5..", "f6..", "f7..", "f8.."}
+                    {"....", "....", "....", "....", "wct.", "....", "....", "....", "....", "....", "....", "...."},
+                    {"wbb.", "wbg.", "wbr.", "wby.", "wcm.", "wg..", "wfmb", "wfmr", "wh1.", "wh2.", "wm..", "wr.."},
+                    {"f1..", "f2..", "f3..", "f4..", "wcb.", "wgb.", "wfbb", "wfbr", "fs..", "fs..", "fh..", "fl.."},
+                    {"f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8.."},
+                    {"f1..", "f2..", "f3..", "f4..", "f1..", "f2..", "f3..", "f4..", "f5..", "f6..", "f7..", "f8.."},
+                    {"f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8.."},
+                    {"f1..", "f2..", "f3..", "f4..", "f1..", "f2..", "f3..", "f4..", "f5..", "f6..", "f7..", "f8.."},
+                    {"f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8.."}
             },
     };
 
     public Tile[][] floor;
 
-    public int[] mapSpeed = new int[2];
+    public double[] mapSpeed = new double[2];
+    private double[] subSpeed = {0, 0};
+    private double[] relaPos = new double[2];
 
     public Map(int level) {
         generateMap(level);
@@ -75,11 +87,18 @@ public class Map {
         for(int row = 0; row < floorPlan[level].length; row++) {
             for(int col = 0; col < floorPlan[level][row].length; col++) {
                 String name = mapSymbs.get(floorPlan[level][row][col]);
-
+                int frames = 0;
                 if(floorPlan[level][row][col].charAt(0) == 'f') {
-                    floor[row][col] = new Floor(name, col * Tile.SIZE + 200, row * Tile.SIZE + 200, 0);
+                    if(floorPlan[level][row][col].charAt(1) == 's') {
+                        frames = 3;
+                    }
+                    floor[row][col] = new Floor(name, col * Tile.SIZE + 200, row * Tile.SIZE + 200, frames);
                 } else if(floorPlan[level][row][col].charAt(0) == 'w') {
-                    floor[row][col] = new Wall(name, col * Tile.SIZE + 200, row * Tile.SIZE + 200, 0);
+                    if(floorPlan[level][row][col].charAt(1) == 'f') {
+                        frames = 3;
+                    }
+
+                    floor[row][col] = new Wall(name, col * Tile.SIZE + 200, row * Tile.SIZE + 200, frames);
                 }
 
             }
@@ -91,7 +110,8 @@ public class Map {
             for(Tile t : row) {
                 if(t instanceof Floor) {
                     if(((Floor) t).checkTouch(touchX, touchY)) {
-                        return new int[]{t.tileX, t.tileY};
+                        int[] tiTouch = {t.tileX, t.tileY};
+                        return tiTouch;
                     }
                 }
             }
@@ -99,15 +119,61 @@ public class Map {
         return null;
     }
 
-    public void calcMapSpeed(int[] tileTouch, int heroX, int heroY, int heroSpd) {
-        //this method is gonna be a lot of math
+    public void calcMapSpeed(int[] tileTouch, int[] heroPos, int heroSpd) {
+        relaPos[0] = (tileTouch[0] - heroPos[0]) * -1;
+        relaPos[1] = (tileTouch[1] - heroPos[1]) * -1;
+
+        double distance = getDist(relaPos[0], relaPos[1]);
+
+        for(int i = 0; i < 2; i++) {
+            mapSpeed[i] = ((relaPos[i] / distance) * heroSpd);
+            subSpeed[i] = 0;
+        }
+    }
+
+    public void update() {
+        if(getDist(relaPos[0], relaPos[1]) <= getDist(mapSpeed[0], mapSpeed[1])) {
+            moveMap(relaPos);
+            for(int i = 0; i < 2; i++) {
+                relaPos[i] = 0;
+                mapSpeed[i] = 0;
+                subSpeed[i] = 0;
+            }
+        } else {
+            moveMap(mapSpeed);
+            for(int i = 0; i < 2; i++) {
+                relaPos[i] -= (int)Math.floor(mapSpeed[i]);
+                subSpeed[i] += mapSpeed[i] - (int)Math.floor(mapSpeed[i]);
+                if (Math.abs(subSpeed[i]) >= 1) {
+                    moveMap(subSpeed);
+                    relaPos[i] -= Math.floor(subSpeed[i]);
+                    subSpeed[i] -= Math.floor(subSpeed[i]);
+                }
+            }
+        }
+    }
+
+    private void moveMap(double[] speed) {
+        for(Tile[] row : floor) {
+            for(Tile t : row) {
+                if(t != null) {
+                    t.move((int) Math.floor(speed[0]), (int) Math.floor(speed[1]));
+                }
+            }
+        }
     }
 
     public void drawMap(Canvas canvas) {
         for(Tile[] row : floor) {
             for(Tile t : row) {
-                t.draw(canvas);
+                if(t != null) {
+                    t.draw(canvas);
+                }
             }
         }
+    }
+
+    private double getDist(double x, double y) {
+        return Math.sqrt(x * x + y * y);
     }
 }

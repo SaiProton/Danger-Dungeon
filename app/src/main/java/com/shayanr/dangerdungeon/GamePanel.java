@@ -10,7 +10,6 @@ import android.view.SurfaceView;
 import com.shayanr.dangerdungeon.gameplay.Sprite;
 import com.shayanr.dangerdungeon.gameplay.entities.*;
 import com.shayanr.dangerdungeon.gameplay.mapping.Map;
-import com.shayanr.dangerdungeon.gameplay.mapping.Tile;
 
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public static int scrWidth;
@@ -75,14 +74,23 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         int[] tileTouch = map.tileTouchPos((int)event.getX(), (int)event.getY());
 
         if(tileTouch != null) {
-            map.calcMapSpeed(tileTouch, knight.xPos, knight.yPos, 1);
+            map.calcMapSpeed(tileTouch, knight.getHurtBox(), 10);
+            knight.changeAnim(knight.animNames[1]);
+
+            if(knight.direction != (int)(-map.mapSpeed[0]/Math.abs(map.mapSpeed[0]))) {
+                knight.direction = (int)(-map.mapSpeed[0]/Math.abs(map.mapSpeed[0]));
+                knight.flipAnim();
+            }
         }
 
         return true;
     }
 
     public void update() {
-
+        map.update();
+        if(map.mapSpeed[0] + map.mapSpeed[1] == 0) {
+            knight.changeAnim(knight.animNames[0]);
+        }
     }
 
     @Override

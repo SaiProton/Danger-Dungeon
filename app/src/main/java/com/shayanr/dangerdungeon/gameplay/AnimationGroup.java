@@ -19,6 +19,14 @@ public class AnimationGroup {
         frameRate = fps / MainThread.MAX_FPS;
     }
 
+    public void flipAnim() {
+        for(HashMap.Entry<String, Sprite[]> frame : animations.entrySet()) {
+            for(Sprite spr : frame.getValue()) {
+                spr.flip();
+            }
+        }
+    }
+
     public AnimationGroup(String[] groupNames, int[] groupFrames, int fps) {
         for(int i = 0; i < groupNames.length; i++) {
             Sprite[] frames = new Sprite[groupFrames[i]];

@@ -16,6 +16,11 @@ public class Knight extends Entity {
     }
 
     @Override
+    public int[] getHurtBox() {
+        return new int[]{xPos, (int)(yPos + height / 2.0)};
+    }
+
+    @Override
     public void update() {
 
     }
