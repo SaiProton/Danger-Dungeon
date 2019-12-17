@@ -124,7 +124,7 @@ public class Map {
         relaPos[1] = (tileTouch[1] - heroPos[1]) * -1;
 
         double distance = getDist(relaPos[0], relaPos[1]);
-        System.out.println(distance);
+
         for(int i = 0; i < 2; i++) {
             mapSpeed[i] = ((relaPos[i] / distance) * heroSpd);
             subSpeed[i] = 0;

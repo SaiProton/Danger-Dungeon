@@ -81,7 +81,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             if(!Double.isNaN(map.mapSpeed[0] + map.mapSpeed[1])) {
                 knight.changeAnim(knight.animNames[1]);
 
-                if(knight.direction != (int) (-map.mapSpeed[0] / Math.abs(map.mapSpeed[0]))) {
+                if(map.mapSpeed[0] != 0 && knight.direction != (int) (-map.mapSpeed[0] / Math.abs(map.mapSpeed[0]))) {
                     knight.direction = (int) (-map.mapSpeed[0] / Math.abs(map.mapSpeed[0]));
                     knight.flipAnim();
                 }
