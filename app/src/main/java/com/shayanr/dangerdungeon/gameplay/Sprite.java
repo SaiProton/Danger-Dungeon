@@ -24,7 +24,7 @@ public class Sprite {
 
     public Sprite(String name) {
         int sprId = getSprId(name);
-
+        System.out.println(name);
         sprite = BitmapFactory.decodeResource(resources, sprId, options);
         sprite = Bitmap.createScaledBitmap(sprite, sprite.getWidth() * SCALE, sprite.getHeight() * SCALE, false);
 

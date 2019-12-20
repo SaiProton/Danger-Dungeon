@@ -30,6 +30,11 @@ public abstract class Tile {
         }
     }
 
+    public static Tile parse(String name, String symbol, int x, int y) {
+        int frames = (symbol.charAt(1) == 's' || symbol.charAt(1) == 'f') ? 3 : 0;
+        return (symbol.charAt(0) == 'f') ? new Floor(name, x, y, frames) : new Wall(name, x, y, frames);
+    }
+
     public void move(int dx, int dy) {
         tileX += dx;
         tileY += dy;

@@ -2,6 +2,9 @@ package com.shayanr.dangerdungeon.gameplay.mapping;
 
 import android.graphics.Canvas;
 
+import com.shayanr.dangerdungeon.gameplay.entities.Entity;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Map {
@@ -65,13 +68,20 @@ public class Map {
                     {"f1..", "f2..", "f3..", "f4..", "wcb.", "wgb.", "wfbb", "wfbr", "fs..", "fs..", "fh..", "fl.."},
                     {"f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8.."},
                     {"f1..", "f2..", "f3..", "f4..", "f1..", "f2..", "f3..", "f4..", "f5..", "f6..", "f7..", "f8.."},
-                    {"f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8.."},
+                    {"f5..", "f6..", "f7..", "f8..", "....", "....", "....", "f8..", "....", "f6..", "....", "f8.."},
+                    {"f1..", "f2..", "f3..", "f4..", "....", "f2..", "f3..", "f4..", "....", "f6..", "....", "f8.."},
+                    {"f5..", "f6..", "f7..", "f8..", "....", "....", "f7..", "f8..", "....", "f6..", "....", "f8.."},
+                    {"f5..", "f6..", "f7..", "f8..", "....", "f6..", "f7..", "f8..", "....", "f6..", "....", "f8.."},
+                    {"f1..", "f2..", "f3..", "f4..", "....", "f2..", "f3..", "f4..", "....", "f6..", "....", "f8.."},
+                    {"f5..", "f6..", "f7..", "f8..", "....", "f6..", "f7..", "f8..", "....", "....", "....", "f8.."},
                     {"f1..", "f2..", "f3..", "f4..", "f1..", "f2..", "f3..", "f4..", "f5..", "f6..", "f7..", "f8.."},
                     {"f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8..", "f5..", "f6..", "f7..", "f8.."}
             },
     };
 
-    public Tile[][] floor;
+    public int floorLevel = 0;
+
+    public Tile[] floor;
 
     public double[] mapSpeed = new double[2];
     private double[] subSpeed = {0, 0};
@@ -81,38 +91,40 @@ public class Map {
         generateMap(level);
     }
 
+    private int countTiles() {
+        int count = 0;
+        for(String[] row : floorPlan[floorLevel]) {
+            for(String col : row) {
+                count += (col.charAt(0) != '.' ? 1 : 0);
+            }
+        }
+        return count;
+    }
+
     public void generateMap(int level) {
-        floor = new Tile[floorPlan[level].length][floorPlan[level][0].length];
+        floorLevel = level;
 
-        for(int row = 0; row < floorPlan[level].length; row++) {
-            for(int col = 0; col < floorPlan[level][row].length; col++) {
-                String name = mapSymbs.get(floorPlan[level][row][col]);
-                int frames = 0;
-                if(floorPlan[level][row][col].charAt(0) == 'f') {
-                    if(floorPlan[level][row][col].charAt(1) == 's') {
-                        frames = 3;
-                    }
-                    floor[row][col] = new Floor(name, col * Tile.SIZE + 200, row * Tile.SIZE + 200, frames);
-                } else if(floorPlan[level][row][col].charAt(0) == 'w') {
-                    if(floorPlan[level][row][col].charAt(1) == 'f') {
-                        frames = 3;
-                    }
+        floor = new Tile[countTiles()];
 
-                    floor[row][col] = new Wall(name, col * Tile.SIZE + 200, row * Tile.SIZE + 200, frames);
+        int index = 0;
+        for(int row = 0; row < floorPlan[floorLevel].length; row++) {
+            for(int col = 0; col < floorPlan[floorLevel][row].length; col++) {
+                String symbol = floorPlan[level][row][col];
+                String name = mapSymbs.get(symbol);
+
+                if (symbol.charAt(0) != '.') {
+                    floor[index] = Tile.parse(name, symbol, col * Tile.SIZE, row * Tile.SIZE);
+                    index++;
                 }
-
             }
         }
     }
 
     public int[] tileTouchPos(int touchX, int touchY) {
-        for(Tile[] row : floor) {
-            for(Tile t : row) {
-                if(t instanceof Floor) {
-                    if(((Floor) t).checkTouch(touchX, touchY)) {
-                        int[] tiTouch = {t.tileX, t.tileY};
-                        return tiTouch;
-                    }
+        for(Tile t : floor) {
+            if(t instanceof Floor) {
+                if(((Floor) t).checkTouch(touchX, touchY)) {
+                    return new int[]{t.tileX, t.tileY};
                 }
             }
         }
@@ -154,22 +166,14 @@ public class Map {
     }
 
     private void moveMap(double[] speed) {
-        for(Tile[] row : floor) {
-            for(Tile t : row) {
-                if(t != null) {
-                    t.move((int) Math.floor(speed[0]), (int) Math.floor(speed[1]));
-                }
-            }
+        for(Tile t : floor) {
+            t.move((int) Math.floor(speed[0]), (int) Math.floor(speed[1]));
         }
     }
 
     public void drawMap(Canvas canvas) {
-        for(Tile[] row : floor) {
-            for(Tile t : row) {
-                if(t != null) {
-                    t.draw(canvas);
-                }
-            }
+        for(Tile t : floor) {
+            t.draw(canvas);
         }
     }
 
