@@ -5,8 +5,8 @@ import android.graphics.Canvas;
 import com.shayanr.dangerdungeon.gameplay.AnimationGroup;
 
 public abstract class Entity {
-    public int xPos;
-    public int yPos;
+    int xPos;
+    int yPos;
 
     public int direction = 1;
     public int xSpeed = 0;
@@ -15,12 +15,12 @@ public abstract class Entity {
     public int maxHP;
     public int health;
 
-    private static int FPS = 10;
+    private static int FPS = 12;
 
     public String[] animNames;
-    public AnimationGroup anim;
+    private AnimationGroup anim;
 
-    public void generateAnim(int[] animFrames) {
+    void generateAnim(int[] animFrames) {
         anim = new AnimationGroup(animNames, animFrames, FPS);
     }
 

@@ -79,9 +79,9 @@ public class Map {
             },
     };
 
-    public int floorLevel = 0;
+    private int floorLevel = 0;
 
-    public Tile[] floor;
+    private Tile[] floor;
 
     public double[] mapSpeed = new double[2];
     private double[] subSpeed = {0, 0};
@@ -101,7 +101,7 @@ public class Map {
         return count;
     }
 
-    public void generateMap(int level) {
+    private void generateMap(int level) {
         floorLevel = level;
 
         floor = new Tile[countTiles()];
@@ -173,7 +173,9 @@ public class Map {
 
     public void drawMap(Canvas canvas) {
         for(Tile t : floor) {
-            t.draw(canvas);
+            if(t.onScreen()) {
+                t.draw(canvas);
+            }
         }
     }
 

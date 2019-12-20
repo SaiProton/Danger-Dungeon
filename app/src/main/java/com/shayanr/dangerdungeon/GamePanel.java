@@ -23,8 +23,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private Knight knight;
     private Map map;
 
-    public GamePanel(Context context) {
-        super(context);
+    public GamePanel(Context ctx) {
+        super(ctx);
 
         getHolder().addCallback(this);
 
@@ -33,7 +33,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         scrWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         scrHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
 
-        Sprite.context = context;
         Sprite.resources = getResources();
 
         knight = new Knight(scrWidth, scrHeight);
